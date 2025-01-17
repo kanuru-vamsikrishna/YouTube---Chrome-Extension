@@ -2,7 +2,7 @@
   "name": "My YT Bookmarks",
   "version": "0.1.0",
   "description": "Saving timestamps in YT videos",
-  "permissions": ["storage", "tabs"],
+  "permissions": ["activeTab", "storage", "tabs"],
   "host_permissions": ["https://*.youtube.com/*"],
   "background": {
     "service_worker": "background.js"
@@ -21,7 +21,7 @@
         "assets/delete.png",
         "assets/save.png"
       ],
-      "matches": ["https://*.youtube.com/*"]
+      "matches": ["<all_urls>"]
     }
   ],
   "action": {

@@ -1,10 +1,10 @@
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  // Ensure the tab URL includes "youtube.com/watch"
   if (changeInfo.status === "complete" && tab.url && tab.url.includes("youtube.com/watch")) {
+    console.debug("Sending message to content script for tab:", tabId);
+
     const queryParameters = tab.url.split("?")[1];
     const urlParameters = new URLSearchParams(queryParameters);
 
-    // Send a message to the content script
     chrome.tabs.sendMessage(
       tabId,
       {
@@ -13,9 +13,13 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       },
       (response) => {
         if (chrome.runtime.lastError) {
-          console.error("Content script not ready", chrome.runtime.lastError.message);
+          console.error("Error sending message:", chrome.runtime.lastError.message);
+        } else if (response && response.status === "success") {
+          console.debug("Content script handled message successfully:", response);
+        } else {
+          console.debug("Unexpected response from content script:", response);
         }
       }
-    );
+    );  
   }
 });

@@ -8,16 +8,26 @@
   }
   window.hasRun = true;
 
-  console.log(window, "window");
 
   chrome.runtime.onMessage.addListener((obj, sender, response) => {
     const { type, value, videoId } = obj;
 
     if (type === "NEW") {
       currentVideo = videoId;
-      console.log("123");
+      console.debug("Processing NEW message for video ID:", videoId);
+      setTimeout(() => {
+        response({ status: "success", videoId: videoId });
+        console.debug("Response sent for video ID:", videoId);
+      }, 1000);
       newVideoLoaded();
+    } else if (type === "PLAY") {
+      youtubePlayer.currentTime = value
+    } else if (type === "DELETE") {
+      currentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time !== value)
+      chrome.storage.sync.set({ [currentVideo]: JSON.stringify(currentVideoBookmarks) })
+      response(currentVideoBookmarks)
     }
+    return true
   });
 
   const fetchAllBookmarks = () => {
@@ -34,7 +44,7 @@
 
     // Ensure youtubeLeftControls exists before proceeding
     if (!youtubeLeftControls) {
-      console.log("youtubeLeftControls not found");
+      console.debug("youtubeLeftControls not found");
       return;
     }
 
@@ -51,7 +61,7 @@
       youtubeLeftControls.appendChild(bookmarkBtn);
       bookmarkBtn.addEventListener("click", addNewBookmark);
     } else {
-      console.log("Bookmark button already exists");
+      console.debug("Bookmark button already exists");
     }
   };
 
@@ -61,7 +71,6 @@
       time: currentTime,
       desc: "Bookmark at " + getTime(currentTime),
     };
-    console.log(newBookmark, "newBookmark");
     currentVideoBookmarks = await fetchAllBookmarks();
 
     chrome.storage.sync.set({
@@ -76,5 +85,5 @@
     date.setSeconds(time);
     return date.toISOString().substring(11, 19);
   };
-  console.log("Content script loaded on", window.location.href);
+  console.debug("Content script loaded on", window.location.href);
 })();
